@@ -35,3 +35,10 @@ removing the old object, it will return it (or `nil`) like `node_object.get`.
 
 The library version string is available in `node_object.version`. I'll try to
 stick to SemVer.
+
+## Licenses
+
+All code in this repository is licensed under the MIT license. All other files
+are licensed under a [CC BY-SA 3.0 license][1].
+
+[1]: https://creativecommons.org/licenses/by-sa/3.0/
