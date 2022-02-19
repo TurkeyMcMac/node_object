@@ -1,4 +1,4 @@
-node_object = {version = "0.0.1"}
+node_object = {version = "0.0.2"}
 
 local objects = setmetatable({}, {__mode = "v"})
 
@@ -32,7 +32,7 @@ minetest.register_on_mods_loaded(function()
 			groups.node_object = 1
 			local old_on_construct = def.on_construct
 			local function on_construct(pos, ...)
-				def._node_object_set(pos)
+				def._node_object_set(vector.new(pos))
 				if old_on_construct then
 					return old_on_construct(pos, ...)
 				end
