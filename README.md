@@ -9,32 +9,42 @@ the library. It adds a node called a "Spinner." Try placing this node.
 
 ## API
 
-To make a node use the library, put a callback `_node_object_set` in its
-definition (you cannot do this in an `on_mods_loaded` callback.) This callback
-takes one argument, the node position, and defines how to set the associated
-object. It will be called when the node is added or when it is loaded. When the
-node is added, the callback is called before the `on_construct` callback.
-Because associations are only kept in-memory, you should probably set
-`static_save = false` in the associated object's properties. It is also a good
-idea to optionally depend on "mesecons\_mvps" and make the object unmoveable if
-this mod is present.
+### `node_object.set(pos, object)`
 
-When a node is destroyed, its associated object is removed after the
-`on_destruct` callback.
+Sets the object associated with the node position. If a different object is
+already associated, this object is removed. If `object` is `nil`, the
+association is cleared.
 
-The main function you will need in your callback is
-`node_object.set(pos, object)`. `pos` is the node position and `object` is some
-object or `nil`. If a different object is already associated with the position,
-it is removed. The new object is then set, unless `object` is `nil`. 
+It is recommended that the object have its property `static_save` set to
+`false`, since the association is only in-memory.
 
-`node_object.get(pos)` gets the object associated with the node position. It
-will return `nil` if the object is not set or has been removed or deactivated.
+In addition, you should optionally depend on `mesecons_mvps` and register the
+object's entity type as unmoveable using that mod's API.
 
-`node_object.swap(pos, object)` is like `node_object.set`, but instead of
-removing the old object, it will return it (or `nil`) like `node_object.get`.
+### `node_object.get(pos)`
 
-The library version string is available in `node_object.version`. I'll try to
-stick to SemVer.
+Returns the object (or `nil`) associated with the node position. This will
+return `nil` if the object has been removed or deactivated.
+
+### `node_object.swap(pos, object)`
+
+This is like `node_object.set`, but instead of being removed, the past object
+(or `nil`) is returned.
+
+### Node callback `_node_object_set(pos)`
+
+An object associated with a node is an ephemeral reflection of the node's state.
+By providing this callback in a node definition, you are telling the library to
+call it with a node position as its argument when the node may not have an
+associated object, such as after placement or loading, and to remove any
+associated object before destruction. If the node state changes, you should
+update the object yourself.
+
+Note: you cannot set this callback within an `on_mods_loaded` callback.
+
+### `node_object.version`
+
+This is the library's version string. I'll try to stick to SemVer.
 
 ## Licenses
 

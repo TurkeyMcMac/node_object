@@ -1,4 +1,4 @@
-node_object = {version = "0.0.2"}
+node_object = {version = "0.1.0"}
 
 local objects = setmetatable({}, {__mode = "v"})
 
@@ -25,6 +25,12 @@ function node_object.swap(pos, object)
 	return old_object
 end
 
+local function check_set(pos)
+	local node = minetest.get_node(pos)
+	local set = minetest.registered_nodes[node.name]._node_object_set
+	if set then set(pos) end
+end
+
 minetest.register_on_mods_loaded(function()
 	for name, def in pairs(minetest.registered_nodes) do
 		if def._node_object_set then
@@ -32,22 +38,32 @@ minetest.register_on_mods_loaded(function()
 			groups.node_object = 1
 			local old_on_construct = def.on_construct
 			local function on_construct(pos, ...)
-				def._node_object_set(vector.new(pos))
+				minetest.after(0, check_set, vector.new(pos))
 				if old_on_construct then
 					return old_on_construct(pos, ...)
 				end
 			end
-			local old_after_destruct = def.after_destruct
-			local function after_destruct(pos, ...)
+			local old_on_destruct = def.on_destruct
+			local function on_destruct(pos, ...)
 				node_object.set(pos)
-				if old_after_destruct then
-					return old_after_destruct(pos, ...)
+				if old_on_destruct then
+					return old_on_destruct(pos, ...)
+				end
+			end
+			local old_on_movenode = def.on_movenode
+			local function on_movenode(from_pos, to_pos, ...)
+				node_object.set(from_pos)
+				minetest.after(0, check_set, vector.new(to_pos))
+				if old_on_movenode then
+					return old_on_movenode(
+						from_pos, to_pos, ...)
 				end
 			end
 			minetest.override_item(name, {
 				groups = groups,
 				on_construct = on_construct,
-				after_destruct = after_destruct,
+				on_destruct = on_destruct,
+				on_movenode = on_movenode,
 			})
 		end
 	end
